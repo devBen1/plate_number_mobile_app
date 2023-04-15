@@ -14,7 +14,7 @@ export default {
 				const usersData: Array<CreationAttributes<UserType>> = [
 					{
 						userUID: uuid4(),
-						username: "tekwey",
+						username: "admin",
 						userFullName: "Admin",
 						userEmail: "admin@gmail.com",
 						password: bcryptjs.hashSync("admin@gmail.com", 10),
