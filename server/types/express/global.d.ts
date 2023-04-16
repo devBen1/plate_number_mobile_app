@@ -12,6 +12,8 @@ declare global {
       DB_SSL_REQUIRE: any;
       ACCESS_TOKEN_SECRET?: any;
       REFRESH_TOKEN_SECRET?: any;
+      ACCESS_TOKEN_EXPIRATION_TIME?: any;
+      REFRESH_TOKEN_EXPIRATION_TIME?: any;
     }
   }
 }

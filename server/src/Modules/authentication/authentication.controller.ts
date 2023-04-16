@@ -45,12 +45,12 @@ class AuthenticationController {
                     }
                 },
                 process.env.ACCESS_TOKEN_SECRET,
-                { expiresIn: '10s' }
+                { expiresIn: process.env.ACCESS_TOKEN_EXPIRATION_TIME }
             );
             const refreshToken: any = sign(
                 { "email": response.userEmail },
                 process.env.REFRESH_TOKEN_SECRET,
-                { expiresIn: '5h' }
+                { expiresIn: process.env.REFRESH_TOKEN_EXPIRATION_TIME }
             );
 
             // Saving refreshToken with current user
@@ -124,7 +124,7 @@ class AuthenticationController {
                             }
                         },
                         process.env.ACCESS_TOKEN_SECRET,
-                        { expiresIn: '10s' }
+                        { expiresIn: process.env.ACCESS_TOKEN_EXPIRATION_TIME }
                     );
                     return handleSuccess(res, "", { foundUser, accessToken, roles: foundUser.role });
                 }
