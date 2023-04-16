@@ -57,7 +57,7 @@ const OwnerInfos = db.define<OwnerInfos>(
     {
         createdAt: true,
         updatedAt: true,
-        paranoid: true, // deletedAt
+        paranoid: false, // deletedAt
     },
 );
 

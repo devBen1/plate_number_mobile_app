@@ -4,8 +4,8 @@ import PlateNoController from './plateno.controller';
 import ValidatorMiddleware from "../../middlewares/validator";
 import AuthMiddleware from "../../middlewares/auth";
 
-class FinanceRoutes extends Router {
-  public path = '/plateno';
+class PlatenoRoutes extends Router {
+  public path = '/plate';
   public controller = new PlateNoController();
   public validatorMiddleware = new ValidatorMiddleware();
   public authMiddleware = new AuthMiddleware();
@@ -16,49 +16,54 @@ class FinanceRoutes extends Router {
     this._app = app;
     this.initRouters();
   }
- 
+
   public initRouters() {
+    this.router.get(this.path.concat('/count'),
+      [
+        this.authMiddleware.checkToken,
+        this.authMiddleware.verifyAuth
+      ],
+      this.controller.CountPlates.bind(this));
+
     this.router.get(this.path.concat('/list'),
       [
         this.authMiddleware.checkToken,
-        this.authMiddleware.verifyAuth,
-        this.validatorMiddleware.validateInputs
+        this.authMiddleware.verifyAuth
       ],
-      this.controller.SendMoney.bind(this));    
+      this.controller.ListPlates.bind(this));
 
-    this.router.get(this.path.concat('/search'),
+    this.router.put(this.path.concat('/search'),
       [
         this.authMiddleware.checkToken,
         this.authMiddleware.verifyAuth,
         this.validatorMiddleware.validateInputs
       ],
-      this.controller.SendMoney.bind(this));
-    
+      this.controller.SearchPlates.bind(this));
+
     this.router.post(this.path.concat('/add'),
       [
         this.authMiddleware.checkToken,
         this.authMiddleware.verifyAuth,
         this.validatorMiddleware.validateInputs
       ],
-      this.controller.SendMoney.bind(this));
+      this.controller.AddPlate.bind(this));
 
-    this.router.put(this.path.concat('/edit:id'),
+    this.router.put(this.path.concat('/edit/:id'),
       [
         this.authMiddleware.checkToken,
         this.authMiddleware.verifyAuth,
         this.validatorMiddleware.validateInputs
       ],
-      this.controller.SendMoney.bind(this));
-    
+      this.controller.EditPlate.bind(this));
 
-    this.router.delete(this.path.concat('/delete:id'),
+
+    this.router.delete(this.path.concat('/delete/:id'),
       [
         this.authMiddleware.checkToken,
-        this.authMiddleware.verifyAuth,
-        this.validatorMiddleware.validateInputs
+        this.authMiddleware.verifyAuth
       ],
-      this.controller.SendMoney.bind(this));
+      this.controller.DeletePlate.bind(this));
   }
 }
 
-export default FinanceRoutes;
+export default PlatenoRoutes;

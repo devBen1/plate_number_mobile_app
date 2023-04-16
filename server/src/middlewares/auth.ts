@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { handleError } from '../custom/functions/messageHandlers';
-import AuthenticationService from './../Modules/authentication/authentication.service';
+import AuthenticationService from './../Modules/users/users.service';
 import jwt from 'jsonwebtoken';
 // import config from "./../config/config";
 
@@ -21,10 +21,9 @@ class AuthMiddleware {
                         _id: decoded.UserInfo._id,
                         email: decoded.UserInfo.email,
                     };
-                    next();
+                    return next();
                 }
             );
-            return next();
         } catch (error) {
             return handleError(res, "Error in your data", 400);
         }
@@ -32,15 +31,14 @@ class AuthMiddleware {
     async verifyAuth(req: Request, res: Response, next: NextFunction) {
         try {
             const userID: any = req.decoded;
-            const isUserExist: any = await AuthenticationService.GetUserInfo({ userUID: userID._id }, [
+            const isUserExist: any = await AuthenticationService.UserQuery("findOne", { userUID: userID._id }, [
                 "userUID", "username",
                 "userFullName", "userEmail",
                 "role"
             ]);
-            req.user = isUserExist;
-            if (!isUserExist) {
+            if (!isUserExist)
                 return handleError(res, "Invalid Credential", 400);
-            }
+            req.userInfo = isUserExist;
             return next();
         } catch (error) {
             return handleError(res, "Error in your data", 400);

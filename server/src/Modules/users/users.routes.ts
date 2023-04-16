@@ -4,7 +4,7 @@ import UserController from './users.controller';
 import ValidatorMiddleware from "../../middlewares/validator";
 import AuthMiddleware from "../../middlewares/auth";
 
-class FinanceRoutes extends Router {
+class UserRoutes extends Router {
   public path = '/user';
   public controller = new UserController();
   public validatorMiddleware = new ValidatorMiddleware();
@@ -16,15 +16,14 @@ class FinanceRoutes extends Router {
     this._app = app;
     this.initRouters();
   }
- 
+
   public initRouters() {
     this.router.get(this.path.concat('/list'),
       [
         this.authMiddleware.checkToken,
-        this.authMiddleware.verifyAuth,
-        this.validatorMiddleware.validateInputs
+        this.authMiddleware.verifyAuth
       ],
-      this.controller.SendMoney.bind(this));
+      this.controller.ListUsers.bind(this));
 
     this.router.post(this.path.concat('/add'),
       [
@@ -32,25 +31,24 @@ class FinanceRoutes extends Router {
         this.authMiddleware.verifyAuth,
         this.validatorMiddleware.validateInputs
       ],
-      this.controller.SendMoney.bind(this));
+      this.controller.AddUser.bind(this));
 
-    this.router.put(this.path.concat('/edit:id'),
+    this.router.put(this.path.concat('/edit/:id'),
       [
         this.authMiddleware.checkToken,
         this.authMiddleware.verifyAuth,
         this.validatorMiddleware.validateInputs
       ],
-      this.controller.SendMoney.bind(this));
+      this.controller.EditUser.bind(this));
 
 
-    this.router.delete(this.path.concat('/delete:id'),
+    this.router.delete(this.path.concat('/delete/:id'),
       [
         this.authMiddleware.checkToken,
-        this.authMiddleware.verifyAuth,
-        this.validatorMiddleware.validateInputs
+        this.authMiddleware.verifyAuth
       ],
-      this.controller.SendMoney.bind(this));
+      this.controller.DeleteUser.bind(this));
   }
 }
 
-export default FinanceRoutes;
+export default UserRoutes;

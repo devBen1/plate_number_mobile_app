@@ -1,12 +1,12 @@
 import request from 'supertest';
 import Server from "../../server";
 
-describe('finance', () => {
+describe('users', () => {
     beforeAll(() => {
         return Server.init();
     });
 
-    it('POST /api/finance/send-money', async () => {
+    it('POST /api/users/list', async () => {
         
     });
 
