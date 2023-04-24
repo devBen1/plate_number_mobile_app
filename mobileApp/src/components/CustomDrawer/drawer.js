@@ -11,22 +11,32 @@ import {
   DrawerContentScrollView,
   DrawerItemList,
 } from '@react-navigation/drawer';
+import { useSelector } from 'react-redux';
+import { useNavigation } from '@react-navigation/native';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
+import { logout } from './../../auth/auth';
 
 const CustomDrawer = props => {
+  const navigation = useNavigation();
+  const userData = useSelector((state) => state.userInfoList.info);
+
+  const onLogout = () => {
+    logout();
+    navigation.replace('SignIn');
+  };
   return (
-    <View style={{flex: 1}}>
+    <View style={{ flex: 1 }}>
       <DrawerContentScrollView
         {...props}
-        contentContainerStyle={{ backgroundColor: '#3B71F3'}}>
+        contentContainerStyle={{ backgroundColor: '#3B71F3' }}>
         <ImageBackground
           source={require('../../../assets/images/bg.jpeg')}
-          style={{padding: 24, marginTop: -4}}>
+          style={{ padding: 24, marginTop: -4 }}>
           <Image
             source={require('../../../assets/images/ng_logo.png')}
-            style={{height: 90, width: 90, borderRadius: 50, backgroundColor: '#fff', marginBottom: 10}}
+            style={{ height: 90, width: 90, borderRadius: 50, backgroundColor: '#fff', marginBottom: 10 }}
           />
           <Text
             style={{
@@ -35,21 +45,21 @@ const CustomDrawer = props => {
               fontFamily: 'Roboto-Medium',
               marginBottom: 5,
             }}>
-            John Doe
+            {userData.userFullName}
           </Text>
-          <View style={{flexDirection: 'row'}}>
+          <View style={{ flexDirection: 'row' }}>
             <Text
               style={{
                 color: '#fff',
                 fontFamily: 'Roboto-Regular',
                 marginRight: 5,
               }}>
-              Administrator
+              {userData.role}
             </Text>
             <FontAwesome5 name="superpowers" size={14} color="#fff" />
           </View>
         </ImageBackground>
-        <View style={{flex: 1, backgroundColor: '#fff', paddingTop: 10}}>
+        <View style={{ flex: 1, backgroundColor: '#fff', paddingTop: 10 }}>
           <DrawerItemList {...props} />
         </View>
       </DrawerContentScrollView>
@@ -80,8 +90,8 @@ const CustomDrawer = props => {
             </Text>
           </View>
         </TouchableOpacity> */}
-        <TouchableOpacity onPress={() => {}} style={{paddingVertical: 15}}>
-          <View style={{flexDirection: 'row', alignItems: 'center'}}>
+        <TouchableOpacity onPress={() => onLogout()} style={{ paddingVertical: 15 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <Ionicons name="exit-outline" size={22} />
             <Text
               style={{

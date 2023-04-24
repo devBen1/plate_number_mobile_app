@@ -10,9 +10,15 @@ import { Text } from '@rneui/themed';
 import CustomInput from '../../components/CustomInput';
 import CustomButton from '../../components/CustomButton';
 
+import { useSelector } from 'react-redux';
+import Toast from 'react-native-toast-message';
+import { logout } from './../../auth/auth';
+import { addUsersApi } from '../../service/user_api';
+
 const EMAIL_REGEX = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
 
 const AddUsers = ({ navigation }) => {
+    const userData = useSelector((state) => state.userInfoList.info);
     const [loading, setLoading] = useState(false);
 
     const {
@@ -21,10 +27,66 @@ const AddUsers = ({ navigation }) => {
         watch,
     } = useForm();
 
-    const pswd = watch('password');
+    const pswd = watch('new_password');
 
-    const onSignInPressed = data => {
+    const onSignInPressed = async (data) => {
         setLoading(true);
+        try {
+            const query = await addUsersApi(data, userData.accessToken);
+            if (query.statusCode === 403) {
+                const failedMessage = query.output;
+                failedMessage.map(i =>
+                    Toast.show({
+                        type: 'error',
+                        text1: 'Error',
+                        text2: i.msg,
+                    }),
+                );
+            } else if (query.statusCode !== 200) {
+                const errormessage = query.output;
+                Toast.show({
+                    type: 'error',
+                    text1: 'Error',
+                    text2: errormessage,
+                });
+            } else {
+                const successmessage = query.data.message;
+                Toast.show({
+                    type: 'success',
+                    text1: 'Successfully',
+                    text2: successmessage,
+                });
+            }
+        } catch (err) {
+            if (!err?.response) {
+                const errormessage = 'An error occurred';
+                Toast.show({
+                    type: 'error',
+                    text1: 'Error',
+                    text2: errormessage,
+                });
+            } else if (err.response?.status === 401 || err.response?.status === 402) {
+                logout();
+                navigation.replace('SignIn');
+            } else if (err.response?.status === 403) {
+                const failedMessage = err.response.data.output;
+                failedMessage.map(i =>
+                    Toast.show({
+                        type: 'error',
+                        text1: 'Error',
+                        text2: i.msg,
+                    }),
+                );
+            } else {
+                const errormessage = err.response.data.output;
+                Toast.show({
+                    type: 'error',
+                    text1: 'Error',
+                    text2: errormessage,
+                });
+            }
+        }
+        setLoading(false);
     };
 
     return (
@@ -50,7 +112,7 @@ const AddUsers = ({ navigation }) => {
             />
             <Text style={styles.label}>Fullname</Text>
             <CustomInput
-                name="fullname"
+                name="userFullName"
                 rules={{
                     required: 'Fullname is required',
                     minLength: {
@@ -68,7 +130,7 @@ const AddUsers = ({ navigation }) => {
             />
             <Text style={styles.label}>Email Address</Text>
             <CustomInput
-                name="email"
+                name="userEmail"
                 rules={{
                     required: 'Email is required',
                     pattern: {
@@ -81,7 +143,7 @@ const AddUsers = ({ navigation }) => {
             />
             <Text style={styles.label}>Password</Text>
             <CustomInput
-                name="password"
+                name="new_password"
                 placeholder="Password"
                 rules={{
                     required: 'Password is required',

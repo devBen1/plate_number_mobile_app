@@ -1,14 +1,18 @@
 /* eslint-disable react-native/no-inline-styles */
 import React, { useState } from 'react';
 import { View, Text, SafeAreaView, ScrollView, StyleSheet } from 'react-native';
-import { Skeleton } from '@rneui/themed';
 import { useForm } from 'react-hook-form';
+import { useSelector } from 'react-redux';
 
 import CustomInput from '../../components/CustomInput';
 import CustomButton from '../../components/CustomButton';
 import Navbar from '../../components/Navbar';
+import Toast from 'react-native-toast-message';
+import { logout } from './../../auth/auth';
+import { updateAccountApi } from '../../service/user_api';
 
 const Settings = ({ navigation }) => {
+  const userData = useSelector((state) => state.userInfoList.info);
   const [loading, setLoading] = useState(false);
 
   const {
@@ -16,22 +20,58 @@ const Settings = ({ navigation }) => {
     handleSubmit,
   } = useForm({
     defaultValues: {
-      username: 'test01',
-      fullname: 'John Doe',
-      email: 'john@example.com',
+      username: userData.username,
+      fullname: userData.userFullName,
+      email: userData.userEmail,
     },
   });
 
-  const onSignInPressed = data => {
+  const onSignInPressed = async (data) => {
     setLoading(true);
+    try {
+      const query = await updateAccountApi(data, userData.accessToken);
+      const successmessage = query.data.message;
+      Toast.show({
+        type: 'success',
+        text1: 'Successfully',
+        text2: successmessage,
+      });
+    } catch (err) {
+      if (!err?.response) {
+        const errormessage = 'An error occurred';
+        Toast.show({
+          type: 'error',
+          text1: 'Error',
+          text2: errormessage,
+        });
+      } else if (err.response?.status === 401 || err.response?.status === 402) {
+        logout();
+        navigation.replace('SignIn');
+      } else if (err.response?.status === 403) {
+        const failedMessage = err.response.data.output;
+        failedMessage.map(i =>
+          Toast.show({
+            type: 'error',
+            text1: 'Error',
+            text2: i.msg,
+          }),
+        );
+      } else {
+        const errormessage = err.response.data.output;
+        Toast.show({
+          type: 'error',
+          text1: 'Error',
+          text2: errormessage,
+        });
+      }
+    }
+    setLoading(false);
   };
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
       <ScrollView style={{ padding: 20 }}>
         <Navbar navigation={navigation} name="Settings" />
-
-        <Skeleton height={100} />
 
         <View style={styles.container}>
           <Text style={styles.label}>

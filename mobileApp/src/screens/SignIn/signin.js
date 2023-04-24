@@ -1,5 +1,5 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import {
   View,
   StyleSheet,
@@ -8,21 +8,24 @@ import {
   ScrollView,
   Text,
 } from 'react-native';
-import {useNavigation} from '@react-navigation/native';
-import {useForm} from 'react-hook-form';
+import { useNavigation } from '@react-navigation/native';
+import { useForm } from 'react-hook-form';
 import axios from '../../service/axios';
 import Toast from 'react-native-toast-message';
-// import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useDispatch } from 'react-redux';
 
 
 import Logo from '../../../assets/images/logo.png';
 import CustomInput from '../../components/CustomInput';
 import CustomButton from '../../components/CustomButton';
+import { login } from './../../auth/auth';
+import { usersInfo } from './../../redux/actions';
 
 const SignInScreen = () => {
+  const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
 
-  const {height} = useWindowDimensions();
+  const { height } = useWindowDimensions();
   const navigation = useNavigation();
 
   const {
@@ -39,12 +42,21 @@ const SignInScreen = () => {
         withCredentials: true,
         credentials: 'include',
       });
-      const result = output.data.output.response;
-      console.log(result);
-      // await AsyncStorage.setItem('user', JSON.stringify(result));
+      const result = output.data.output.accessToken;
+      const userInfo = output.data.output.response;
+      login(result, result);
+
+      dispatch(
+        usersInfo({
+          username: userInfo.username,
+          userFullName: userInfo.userFullName,
+          userEmail: userInfo.userEmail,
+          role: userInfo.role,
+          accessToken: result,
+        })
+      );
       navigation.navigate('Home');
     } catch (err) {
-      console.log(err);
       if (!err?.response) {
         const errormessage = 'An error occurred';
         Toast.show({
@@ -85,15 +97,15 @@ const SignInScreen = () => {
       <View style={styles.root}>
         <Image
           source={Logo}
-          style={[styles.logo, {height: height * 0.3}]}
+          style={[styles.logo, { height: height * 0.3 }]}
           resizeMode="contain"
         />
-        <Text style={{fontWeight: 'bold', fontSize: 24, marginBottom: 15}}>
+        <Text style={{ fontWeight: 'bold', fontSize: 24, marginBottom: 15 }}>
           Login to Account
         </Text>
         <CustomInput
           name="username"
-          rules={{required: 'Username is required'}}
+          rules={{ required: 'Username is required' }}
           placeholder="Username"
           control={control}
         />
@@ -102,7 +114,7 @@ const SignInScreen = () => {
           placeholder="Password"
           rules={{
             required: 'Password is required',
-            minLength: {value: 3, message: 'Password is too short'},
+            minLength: { value: 3, message: 'Password is too short' },
           }}
           control={control}
           secureTextEntry={true}

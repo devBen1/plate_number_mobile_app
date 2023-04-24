@@ -8,8 +8,13 @@ import CustomInput from '../../components/CustomInput';
 import SliderButton from '../../components/SliderButton';
 import CongratulationsLogo from '../../../assets/images/congrats.png';
 import GetStartedLogo from '../../../assets/images/get_started.png';
+import { useSelector } from 'react-redux';
+import Toast from 'react-native-toast-message';
+import { logout } from './../../auth/auth';
+import { addPlatesApi } from '../../service/plate_api';
 
 const AddPlates = ({ navigation }) => {
+  const userData = useSelector((state) => state.userInfoList.info);
   const [steps, setSteps] = useState(['Welcome', 'Vehicle', 'Owner', 'Finish']);
   const [currentStep, setCurrentStep] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -22,9 +27,66 @@ const AddPlates = ({ navigation }) => {
     formState: { errors },
   } = useForm();
 
-  const onSignInPressed = data => {
-    console.log(data);
+  const onSubmitAction = async (data) => {
     setLoading(true);
+    try {
+      data.plateImage = 'plateImage';
+      data.ownerImage = 'OwnerImage';
+      const query = await addPlatesApi(data, userData.accessToken);
+      if (query.statusCode === 403) {
+        const failedMessage = query.output;
+        failedMessage.map(i =>
+          Toast.show({
+            type: 'error',
+            text1: 'Error',
+            text2: i.msg,
+          }),
+        );
+      } else if (query.statusCode !== 200) {
+        const errormessage = query.output;
+        Toast.show({
+          type: 'error',
+          text1: 'Error',
+          text2: errormessage,
+        });
+      } else {
+        const successmessage = query.data.message;
+        Toast.show({
+          type: 'success',
+          text1: 'Successfully',
+          text2: successmessage,
+        });
+      }
+    } catch (err) {
+      if (!err?.response) {
+        const errormessage = 'An error occurred';
+        Toast.show({
+          type: 'error',
+          text1: 'Error',
+          text2: errormessage,
+        });
+      } else if (err.response?.status === 401 || err.response?.status === 402) {
+        logout();
+        navigation.replace('SignIn');
+      } else if (err.response?.status === 403) {
+        const failedMessage = err.response.data.output;
+        failedMessage.map(i =>
+          Toast.show({
+            type: 'error',
+            text1: 'Error',
+            text2: i.msg,
+          }),
+        );
+      } else {
+        const errormessage = err.response.data.output;
+        Toast.show({
+          type: 'error',
+          text1: 'Error',
+          text2: errormessage,
+        });
+      }
+    }
+    setLoading(false);
   };
 
   const goNext = () => {
@@ -102,42 +164,42 @@ const AddPlates = ({ navigation }) => {
             />
             <Text style={styles.label}>Vehicle Manufacturer</Text>
             <CustomInput
-              name="manufacturer"
+              name="vehicleManufacturer"
               rules={{ required: 'Vehicle Manufacturer is required' }}
               placeholder="Enter Vehicle Manufacturer"
               control={control}
             />
             <Text style={styles.label}>Vehicle Category</Text>
             <CustomInput
-              name="category"
+              name="vehicleCategory"
               rules={{ required: 'Vehicle Category is required' }}
               placeholder="Enter Vehicle Category"
               control={control}
             />
             <Text style={styles.label}>Vehicle Model No</Text>
             <CustomInput
-              name="modelNo"
+              name="vehicleModelNo"
               rules={{ required: 'Vehicle Model No is required' }}
               placeholder="Enter Vehicle Model No"
               control={control}
             />
             <Text style={styles.label}>Vehicle Chassis No</Text>
             <CustomInput
-              name="chassisNo"
+              name="vehicleChassisNo"
               rules={{ required: 'Vehicle Chassis No is required' }}
               placeholder="Enter Vehicle Chassis No"
               control={control}
             />
             <Text style={styles.label}>Expiring Date</Text>
             <CustomInput
-              name="expirationDate"
+              name="vehicleEpiringDate"
               rules={{ required: 'Expiring Date is required' }}
               placeholder="Enter Expiring Date"
               control={control}
             />
             <Text style={styles.label}>Allocation Date</Text>
             <CustomInput
-              name="allocationDate"
+              name="vehicleAllocationDate"
               rules={{ required: 'Allocation Date is required' }}
               placeholder="Enter Allocation Date"
               control={control}
@@ -163,21 +225,21 @@ const AddPlates = ({ navigation }) => {
             />
             <Text style={styles.label}>Owner Identification Type</Text>
             <CustomInput
-              name="ownerIdentification"
+              name="ownerID"
               rules={{ required: 'Owner Identification is required' }}
               placeholder="Enter Owner Identification"
               control={control}
-              />
+            />
             <Text style={styles.label}>Owner Mobile No</Text>
             <CustomInput
-              name="mobileNo"
+              name="ownerMobileNo"
               rules={{ required: 'Owner Mobile No is required' }}
               placeholder="Enter Owner Mobile No"
               control={control}
             />
             <Text style={styles.label}>Owner Home Line</Text>
             <CustomInput
-              name="homeLine"
+              name="ownerHomeLine"
               rules={{ required: 'Owner Home Line is required' }}
               placeholder="Enter Owner Home Line"
               control={control}
@@ -198,19 +260,19 @@ const AddPlates = ({ navigation }) => {
             />
             <Text style={styles.label}>City</Text>
             <CustomInput
-              name="city"
+              name="ownerCity"
               rules={{ required: 'City is required' }}
               placeholder="Enter City"
               control={control}
             />
             <Text style={styles.label}>Owner L.G.A</Text>
             <CustomInput
-              name="lga"
+              name="ownerLGA"
               rules={{ required: 'Owner L.G.A is required' }}
               placeholder="Enter Owner L.G.A"
               control={control}
             />
-            </View>
+          </View>
         }
         {currentStep === 3 &&
           <View style={styles.stepHeader}>
@@ -238,7 +300,7 @@ const AddPlates = ({ navigation }) => {
           }
           {(currentStep + 1) === steps.length &&
             <SliderButton
-              onPress={handleSubmit(onSignInPressed)}
+              onPress={handleSubmit(onSubmitAction)}
               loading={{
                 status: loading,
                 color: '#fff',
