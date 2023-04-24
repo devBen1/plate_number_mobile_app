@@ -2,11 +2,13 @@ import Router from "../../core/routers";
 import App from "../../app";
 import AuthenticationController from './authentication.controller';
 import ValidatorMiddleware from "../../middlewares/validator";
+import AuthMiddleware from "../../middlewares/auth";
 
 class AuthenticationRoutes extends Router {
   public path = '/auth';
   public controller = new AuthenticationController();
   public validatorMiddleware = new ValidatorMiddleware();
+  public authMiddleware = new AuthMiddleware();
   private _app;
 
   constructor(app: App) {
@@ -27,7 +29,11 @@ class AuthenticationRoutes extends Router {
       this.controller.Logout.bind(this));
     
     this.router.put(this.path.concat('/update/account'),
-      [this.validatorMiddleware.validateInputs],
+      [
+        this.authMiddleware.checkToken,
+        this.authMiddleware.verifyAuth,
+        this.validatorMiddleware.validateInputs
+      ],
       this.controller.UpdateInfo.bind(this));
   }
 }

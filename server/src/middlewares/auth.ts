@@ -16,7 +16,7 @@ class AuthMiddleware {
                 process.env.ACCESS_TOKEN_SECRET,
                 (err: any, decoded: any) => {
                     if (err)
-                        return handleError(res, "Invalid Token...", 403);
+                        return handleError(res, "Invalid Token...", 402);
                     req.decoded = {
                         _id: decoded.UserInfo._id,
                         email: decoded.UserInfo.email,
